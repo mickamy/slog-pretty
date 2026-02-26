@@ -111,7 +111,12 @@ not json
 			}
 
 			if tt.lines > 0 {
-				gotLines := strings.Count(strings.TrimRight(got, "\n"), "\n") + 1
+				var gotLines int
+				if got == "" {
+					gotLines = 0
+				} else {
+					gotLines = strings.Count(strings.TrimRight(got, "\n"), "\n") + 1
+				}
 				if gotLines < tt.lines {
 					t.Errorf("expected at least %d lines, got %d\noutput: %q",
 						tt.lines, gotLines, got)

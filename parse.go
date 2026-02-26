@@ -68,7 +68,7 @@ func Parse(line []byte) (*Record, bool) {
 		}
 	}
 
-	if rec.Level == "" && rec.Message == "" {
+	if rec.Time.IsZero() && rec.Level == "" && rec.Message == "" {
 		return nil, false
 	}
 
