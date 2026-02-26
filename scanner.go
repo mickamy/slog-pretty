@@ -3,8 +3,10 @@ package spretty
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"strconv"
 )
 
 const maxLineSize = 1024 * 1024 // 1MB
@@ -34,7 +36,7 @@ func (s *Scanner) Scan(r io.Reader, w io.Writer) error {
 			}
 		}
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				return nil
 			}
 			return fmt.Errorf("reading input: %w", err)
@@ -49,6 +51,9 @@ func readLine(br *bufio.Reader) ([]byte, error) {
 		buf = append(buf, fragment...)
 
 		if !isPrefix || err != nil {
+			if err != nil {
+				err = fmt.Errorf("reading line: %w", err)
+			}
 			return buf, err
 		}
 
@@ -57,7 +62,10 @@ func readLine(br *bufio.Reader) ([]byte, error) {
 			for isPrefix && err == nil {
 				_, isPrefix, err = br.ReadLine()
 			}
-			return buf, err
+			if err != nil {
+				return buf, fmt.Errorf("discarding oversized line: %w", err)
+			}
+			return buf, nil
 		}
 	}
 }
@@ -83,13 +91,14 @@ func (s *Scanner) processLine(w io.Writer, line []byte) error {
 	return nil
 }
 
+//nolint:gosec // output is log text, not user-facing HTML
 func (s *Scanner) writeOverflow(w io.Writer, line []byte) error {
 	rec := &Record{
 		Level:   "WARN",
 		Message: "[spretty] line truncated",
 		Attrs: []Attr{
-			{Key: "max", Value: json.Number(fmt.Sprintf("%d", maxLineSize))},
-			{Key: "size", Value: json.Number(fmt.Sprintf("%d", len(line)))},
+			{Key: "max", Value: json.Number(strconv.Itoa(maxLineSize))},
+			{Key: "size", Value: json.Number(strconv.Itoa(len(line)))},
 		},
 	}
 	_, err := fmt.Fprintln(w, s.formatter.Format(rec))

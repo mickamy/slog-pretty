@@ -59,7 +59,7 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			name:   "with source",
+			name: "with source",
 			input: `{"time":"2026-02-26T10:15:30Z","level":"ERROR","msg":"fail",` +
 				`"source":{"function":"main.run","file":"/app/main.go","line":42}}`,
 			wantOK: true,

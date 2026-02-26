@@ -138,6 +138,7 @@ func slogAttrToAttr(groups []string, a slog.Attr) Attr {
 }
 
 func slogValueToAny(v slog.Value) any {
+	//exhaustive:enforce
 	switch v.Kind() {
 	case slog.KindGroup:
 		m := make(map[string]any)
@@ -147,6 +148,10 @@ func slogValueToAny(v slog.Value) any {
 		return m
 	case slog.KindLogValuer:
 		return slogValueToAny(v.Resolve())
+	case slog.KindAny, slog.KindBool, slog.KindDuration,
+		slog.KindFloat64, slog.KindInt64, slog.KindString,
+		slog.KindTime, slog.KindUint64:
+		return v.Any()
 	default:
 		return v.Any()
 	}
