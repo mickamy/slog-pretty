@@ -13,7 +13,7 @@ type Formatter struct {
 
 // NewFormatter creates a Formatter with the given options.
 func NewFormatter(opts ...Option) *Formatter {
-	return &Formatter{cfg: defaultConfig(opts)}
+	return &Formatter{cfg: newConfig(opts)}
 }
 
 // Format returns the formatted representation of a Record.

@@ -7,14 +7,15 @@ const (
 )
 
 type config struct {
-	timeFormat string
-	noColor    bool
-	ignoreKeys map[string]struct{}
-	levelWidth int
-	indent     string
+	timeFormat  string
+	noColor     bool
+	ignoreKeys  map[string]struct{}
+	levelWidth  int
+	indent      string
+	handlerOpts *HandlerOptions
 }
 
-func defaultConfig(opts []Option) config {
+func newConfig(opts []Option) config {
 	c := config{
 		timeFormat: defaultTimeFormat,
 		levelWidth: defaultLevelWidth,
