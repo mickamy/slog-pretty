@@ -13,9 +13,9 @@ type Record struct {
 
 // Source represents the slog source location.
 type Source struct {
-	Function string
-	File     string
-	Line     int
+	Function string `json:"function"`
+	File     string `json:"file"`
+	Line     int    `json:"line"`
 }
 
 // Attr is an ordered key-value pair from a log line.
