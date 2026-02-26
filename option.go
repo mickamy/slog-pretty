@@ -14,12 +14,16 @@ type config struct {
 	indent     string
 }
 
-func defaultConfig() config {
-	return config{
+func defaultConfig(opts []Option) config {
+	c := config{
 		timeFormat: defaultTimeFormat,
 		levelWidth: defaultLevelWidth,
 		indent:     defaultIndent,
 	}
+	for _, o := range opts {
+		o(&c)
+	}
+	return c
 }
 
 // Option configures formatting behavior.
