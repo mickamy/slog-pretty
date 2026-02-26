@@ -1,0 +1,36 @@
+version: 2
+
+release:
+  mode: replace
+
+builds:
+  - id: spretty
+    main: ./cmd/spretty
+    binary: spretty
+    ldflags:
+      - -X main.version={{.Version}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - ids:
+      - spretty
+    formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+brews:
+  - name: spretty
+    homepage: https://github.com/mickamy/slog-pretty
+    description: Pretty-printer for slog JSON logs — as a CLI pipe or slog.Handler
+    repository:
+      owner: mickamy
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+
+changelog:
+  sort: asc
