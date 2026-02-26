@@ -11,9 +11,11 @@ import (
 
 const maxLineSize = 1024 * 1024 // 1MB
 
+var newline = []byte("\n") //nolint:gochecknoglobals // constant byte slice
+
 // Scanner reads lines from an io.Reader, formats slog JSON lines,
 // and writes the output to an io.Writer. Non-JSON lines are passed through.
-// Lines exceeding 1MB are passed through with a truncation warning.
+// Lines exceeding 1MB emit a truncation warning.
 type Scanner struct {
 	formatter *Formatter
 }
@@ -30,11 +32,16 @@ func (s *Scanner) Scan(r io.Reader, w io.Writer) error {
 
 	for {
 		line, err := readLine(br)
-		if len(line) > 0 {
-			if writeErr := s.processLine(w, line); writeErr != nil {
-				return writeErr
-			}
+
+		// EOF with no data: we're done.
+		if err != nil && errors.Is(err, io.EOF) && len(line) == 0 {
+			return nil
 		}
+
+		if writeErr := s.processLine(w, line); writeErr != nil {
+			return writeErr
+		}
+
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				return nil
@@ -84,9 +91,12 @@ func (s *Scanner) processLine(w io.Writer, line []byte) error {
 		return nil
 	}
 
-	_, err := fmt.Fprintln(w, string(line))
-	if err != nil {
+	// Write raw bytes to preserve non-UTF-8 content.
+	if _, err := w.Write(line); err != nil {
 		return fmt.Errorf("writing passthrough line: %w", err)
+	}
+	if _, err := w.Write(newline); err != nil {
+		return fmt.Errorf("writing passthrough newline: %w", err)
 	}
 	return nil
 }
@@ -97,8 +107,8 @@ func (s *Scanner) writeOverflow(w io.Writer, line []byte) error {
 		Level:   "WARN",
 		Message: "[spretty] line truncated",
 		Attrs: []Attr{
-			{Key: "max", Value: json.Number(strconv.Itoa(maxLineSize))},
-			{Key: "size", Value: json.Number(strconv.Itoa(len(line)))},
+			{Key: "max_bytes", Value: json.Number(strconv.Itoa(maxLineSize))},
+			{Key: "read_bytes", Value: json.Number(strconv.Itoa(len(line)))},
 		},
 	}
 	_, err := fmt.Fprintln(w, s.formatter.Format(rec))

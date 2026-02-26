@@ -11,11 +11,12 @@ import (
 // Returns (record, true) on success, or (nil, false) if the line is not valid
 // JSON or does not contain the expected slog fields.
 func Parse(line []byte) (*Record, bool) {
-	if len(line) == 0 || line[0] != '{' {
+	trimmed := bytes.TrimLeft(line, " \t\r\n")
+	if len(trimmed) == 0 || trimmed[0] != '{' {
 		return nil, false
 	}
 
-	dec := json.NewDecoder(bytes.NewReader(line))
+	dec := json.NewDecoder(bytes.NewReader(trimmed))
 	dec.UseNumber()
 
 	tok, err := dec.Token()
@@ -68,6 +69,16 @@ func Parse(line []byte) (*Record, bool) {
 	}
 
 	if rec.Level == "" && rec.Message == "" {
+		return nil, false
+	}
+
+	// Consume closing delimiter.
+	if _, err := dec.Token(); err != nil {
+		return nil, false
+	}
+
+	// Reject trailing garbage after the JSON object.
+	if dec.More() {
 		return nil, false
 	}
 

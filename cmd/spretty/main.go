@@ -42,8 +42,17 @@ func main() {
 	}
 
 	if *ignore != "" {
-		keys := strings.Split(*ignore, ",")
-		opts = append(opts, spretty.WithIgnoreKeys(keys...))
+		rawKeys := strings.Split(*ignore, ",")
+		var keys []string
+		for _, k := range rawKeys {
+			k = strings.TrimSpace(k)
+			if k != "" {
+				keys = append(keys, k)
+			}
+		}
+		if len(keys) > 0 {
+			opts = append(opts, spretty.WithIgnoreKeys(keys...))
+		}
 	}
 
 	s := spretty.NewScanner(opts...)

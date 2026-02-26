@@ -3,6 +3,7 @@ package spretty
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -86,6 +87,7 @@ func (f *Formatter) writeMap(b *strings.Builder, m map[string]any, prefix string
 	for k := range m {
 		keys = append(keys, k)
 	}
+	slices.Sort(keys)
 
 	for i, k := range keys {
 		b.WriteString(prefix)

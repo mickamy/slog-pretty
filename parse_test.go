@@ -145,6 +145,22 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
+			name:   "leading whitespace",
+			input:  `  {"level":"INFO","msg":"hello"}`,
+			wantOK: true,
+			check: func(t *testing.T, r *spretty.Record) {
+				t.Helper()
+				if r.Message != "hello" {
+					t.Errorf("Message = %q, want %q", r.Message, "hello")
+				}
+			},
+		},
+		{
+			name:   "trailing garbage",
+			input:  `{"level":"INFO","msg":"hello"} garbage`,
+			wantOK: false,
+		},
+		{
 			name:   "preserves attribute order",
 			input:  `{"time":"2026-02-26T10:00:00Z","level":"INFO","msg":"test","z_key":"z","a_key":"a","m_key":"m"}`,
 			wantOK: true,

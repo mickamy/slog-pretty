@@ -2,7 +2,7 @@ BUILD_DIR = bin
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS = -ldflags "-X main.version=$(VERSION)"
 
-.PHONY: all build build-tap build-tapd install uninstall clean test lint
+.PHONY: all build install uninstall clean test lint
 
 all: build
 

@@ -77,7 +77,7 @@ not json
 			contains: []string{
 				"WARN",
 				"[spretty] line truncated",
-				"max=1048576",
+				"max_bytes=1048576",
 				"INFO",
 				"after",
 			},
